@@ -1,0 +1,270 @@
+# =============================================================================
+# AI Algo Trading System — Master Configuration
+# All tunable parameters live here. Never hardcode values in source code.
+# =============================================================================
+
+system:
+  name: "AI-Algo-Trading"
+  version: "1.0.0"
+  mode: "paper"  # "paper" or "live" — global default, overridden per market
+  log_level: "INFO"
+  timezone: "US/Eastern"
+
+# -----------------------------------------------------------------------------
+# Market Configuration
+# -----------------------------------------------------------------------------
+markets:
+  us:
+    enabled: true
+    mode: "paper"  # independent paper/live per market
+    broker: "alpaca"
+    currency: "USD"
+    exchange: "NYSE/NASDAQ"
+    watchlist:
+      - "AAPL"
+      - "MSFT"
+      - "GOOGL"
+      - "AMZN"
+      - "TSLA"
+      - "NVDA"
+      - "META"
+      - "SPY"
+      - "QQQ"
+      - "AMD"
+    trading_hours:
+      open: "09:30"
+      close: "16:00"
+      timezone: "US/Eastern"
+      no_trade_open_minutes: 15   # skip first 15 min
+      no_trade_close_minutes: 15  # skip last 15 min
+    fees:
+      commission: 0.0
+      sec_fee_per_dollar: 0.0000278  # SEC fee rate (updated periodically)
+      taf_fee_per_share: 0.000166    # FINRA TAF
+      slippage_pct: 0.001            # 0.1% slippage estimate
+      spread_pct: 0.0005             # 0.05% spread estimate
+
+  india:
+    enabled: true
+    mode: "paper"
+    broker: "zerodha"
+    currency: "INR"
+    exchange: "NSE/BSE"
+    watchlist:
+      - "RELIANCE"
+      - "TCS"
+      - "INFY"
+      - "HDFCBANK"
+      - "ICICIBANK"
+      - "SBIN"
+      - "BHARTIARTL"
+      - "ITC"
+      - "KOTAKBANK"
+      - "LT"
+    trading_hours:
+      open: "09:15"
+      close: "15:30"
+      timezone: "Asia/Kolkata"
+      no_trade_open_minutes: 15
+      no_trade_close_minutes: 15
+    fees:
+      brokerage_per_trade: 20         # INR flat per executed order
+      stt_delivery_pct: 0.001         # 0.1% on buy+sell
+      stt_intraday_sell_pct: 0.00025  # 0.025% on sell side
+      transaction_charges_pct: 0.0000345
+      sebi_charges_pct: 0.000001
+      gst_pct: 0.18                   # 18% GST on brokerage + transaction charges
+      stamp_duty_buy_pct: 0.00015     # 0.015% on buy side
+      slippage_pct: 0.001
+      spread_pct: 0.0005
+
+# -----------------------------------------------------------------------------
+# Risk Management
+# -----------------------------------------------------------------------------
+risk:
+  max_risk_per_trade_pct: 0.01       # 1% of capital per trade
+  max_open_positions_per_market: 3
+  max_trades_per_market_per_day: 10
+  max_daily_drawdown_pct: 0.03       # 3% — halt for the day
+  max_weekly_drawdown_pct: 0.08      # 8% — halt for the week
+  stop_loss_atr_multiplier: 2.0
+  take_profit_rr_ratio: 2.0          # 2:1 reward-to-risk minimum
+  trailing_stop_activation_rr: 1.5   # activate trailing stop at 1.5:1
+  trailing_stop_atr_multiplier: 1.5
+
+# -----------------------------------------------------------------------------
+# Trading Psychology Rules
+# -----------------------------------------------------------------------------
+psychology:
+  revenge_trade_lookback: 2           # consecutive losses before cooldown
+  revenge_trade_cooldown_minutes: 30
+  min_signal_confidence: 0.65
+  sentiment_override_threshold: -0.7  # block longs if sentiment below this
+  no_averaging_down: true
+
+# -----------------------------------------------------------------------------
+# Strategy Parameters
+# -----------------------------------------------------------------------------
+strategy:
+  active_strategies:
+    - "momentum"
+    - "mean_reversion"
+    - "breakout"
+    - "ma_crossover"
+    - "rsi_divergence"
+    - "volume_price"
+    - "sentiment"
+    - "hybrid"
+
+  weights:
+    momentum: 0.15
+    mean_reversion: 0.10
+    breakout: 0.15
+    ma_crossover: 0.10
+    rsi_divergence: 0.10
+    volume_price: 0.10
+    sentiment: 0.15
+    hybrid: 0.15
+
+  # Momentum
+  momentum:
+    fast_period: 12
+    slow_period: 26
+    signal_period: 9
+    lookback_days: 20
+
+  # Mean Reversion
+  mean_reversion:
+    bollinger_period: 20
+    bollinger_std: 2.0
+    rsi_period: 14
+    rsi_oversold: 30
+    rsi_overbought: 70
+
+  # Breakout
+  breakout:
+    lookback_period: 20
+    volume_threshold: 1.5  # 1.5x average volume
+    confirmation_candles: 2
+
+  # Moving Average Crossover
+  ma_crossover:
+    fast_ma: 9
+    slow_ma: 21
+    signal_ma: 50
+    ma_type: "EMA"  # EMA or SMA
+
+  # RSI Divergence
+  rsi_divergence:
+    rsi_period: 14
+    divergence_lookback: 10
+    min_divergence_strength: 0.3
+
+  # Volume Price
+  volume_price:
+    vwap_period: 20
+    volume_ma_period: 20
+    price_volume_threshold: 1.3
+
+  # Sentiment
+  sentiment:
+    min_score_for_long: 0.3
+    max_score_for_short: -0.3
+    weight_in_hybrid: 0.3
+
+  # Multi-timeframe
+  timeframes:
+    trend: "1d"      # higher timeframe for trend
+    entry: "15m"     # lower timeframe for entry
+    confirmation: "4h"
+
+  # Backtesting
+  backtest:
+    lookback_years: 2
+    min_trades: 500
+    min_win_rate: 0.60
+    min_sharpe: 1.0
+    max_drawdown: 0.20
+
+# -----------------------------------------------------------------------------
+# Graduation Criteria (Paper -> Live)
+# -----------------------------------------------------------------------------
+graduation:
+  min_trades: 100
+  min_days: 30
+  min_win_rate: 0.70
+  min_sharpe: 1.0
+  max_drawdown: 0.10
+  max_single_day_loss_pct: 0.03
+  win_rate_ci_lower_bound: 0.65  # 95% CI lower bound
+  require_human_confirmation: true
+
+# -----------------------------------------------------------------------------
+# Sentiment Engine
+# -----------------------------------------------------------------------------
+sentiment:
+  update_interval_minutes: 15
+  model: "claude-sonnet-4-20250514"
+  max_headlines_per_update: 50
+  score_range:
+    min: -1.0
+    max: 1.0
+  sources:
+    - "newsapi"
+    - "google_news_rss"
+    - "yahoo_finance"
+
+# -----------------------------------------------------------------------------
+# Notifications
+# -----------------------------------------------------------------------------
+notifications:
+  email:
+    enabled: true
+    daily_summary_time: "22:00"  # 10 PM ET
+    daily_summary_timezone: "US/Eastern"
+  sms:
+    enabled: true
+  events:
+    - "bot_started"
+    - "bot_stopped"
+    - "market_opened"
+    - "market_closed"
+    - "trade_executed"
+    - "drawdown_warning"
+    - "drawdown_halt"
+    - "weekly_drawdown_halt"
+    - "graduation_ready"
+    - "mode_switched"
+    - "error"
+    - "daily_summary"
+
+# -----------------------------------------------------------------------------
+# API Endpoints
+# -----------------------------------------------------------------------------
+api:
+  alpaca:
+    base_url_paper: "https://paper-api.alpaca.markets"
+    base_url_live: "https://api.alpaca.markets"
+    data_url: "https://data.alpaca.markets"
+    ws_url_paper: "wss://stream.data.alpaca.markets/v2/iex"
+    ws_url_live: "wss://stream.data.alpaca.markets/v2/sip"
+  zerodha:
+    base_url: "https://api.kite.trade"
+    login_url: "https://kite.zerodha.com/connect/login"
+    ws_url: "wss://ws.kite.trade"
+  anthropic:
+    base_url: "https://api.anthropic.com"
+  newsapi:
+    base_url: "https://newsapi.org/v2"
+  dashboard:
+    host: "0.0.0.0"
+    port: 8000
+
+# -----------------------------------------------------------------------------
+# Database
+# -----------------------------------------------------------------------------
+database:
+  type: "sqlite"
+  path: "db/trading.db"
+  journal_mode: "WAL"     # Write-Ahead Logging for concurrent reads
+  busy_timeout_ms: 5000
