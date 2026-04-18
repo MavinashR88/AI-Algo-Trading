@@ -8,8 +8,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir uvicorn[standard]
+    pip install --no-cache-dir -r requirements.txt
+
+# Download VADER sentiment lexicon
+RUN python -c "import nltk; nltk.download('vader_lexicon', download_dir='/usr/local/nltk_data')"
 
 COPY . .
 
@@ -19,6 +21,7 @@ EXPOSE 7860
 
 ENV PYTHONUNBUFFERED=1 \
     PORT=7860 \
-    DB_PATH=/tmp/trading.db
+    DB_PATH=/tmp/trading.db \
+    NLTK_DATA=/usr/local/nltk_data
 
 CMD ["python", "app.py"]
