@@ -81,7 +81,6 @@ class AlpacaBroker(BaseBroker):
         logger.info("alpaca.disconnected")
 
     async def get_account(self) -> AccountInfo:
-        from alpaca.trading.requests import GetAccountRequest
         account = self._trading_client.get_account()
         return AccountInfo(
             buying_power=float(account.buying_power),
