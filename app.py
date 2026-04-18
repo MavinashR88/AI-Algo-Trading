@@ -63,7 +63,7 @@ def _bootstrap_demo_data(db: Database) -> None:
 def main() -> None:
     db_path = os.environ.get("DB_PATH", "/tmp/trading.db")
     db = Database(db_path)
-    db.migrate()
+    db.initialize()
     _bootstrap_demo_data(db)
     set_database(db)
 
